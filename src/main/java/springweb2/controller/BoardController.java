@@ -1,20 +1,21 @@
 package springweb2.controller;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import springweb2.dto.BoardDto;
 import springweb2.service.BoardService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
 @Controller
 public class BoardController {
+
+
 
     @Autowired
     BoardService boardService;
@@ -49,9 +50,43 @@ public class BoardController {
         }catch(Exception e){e.printStackTrace();}
     }
     // 개별 게시물 출력
+    @Autowired
+    private HttpServletRequest request;
+    @GetMapping("/view")
+    public String viewpage(@RequestParam("bno") int bno){
+        request.getSession().setAttribute("bno",bno);
+        return "view";
+    }
+
+
+    @PostMapping("/view")
+    @ResponseBody
+    public void view(HttpServletResponse response, HttpServletRequest request){
+        int bno = (Integer)(request.getSession().getAttribute("bno"));
+        JSONObject object = boardService.getboard(bno);
+        try{
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json");
+            response.getWriter().print(object);
+        }catch(Exception e){e.printStackTrace();}
+
+    }
+
 
     // 게시물 수정
+    @PostMapping("/bupdate")
+    @ResponseBody
+    public boolean bupdate(@RequestParam("btitle") String btitle, @RequestParam("bcontent") String bcontent){
+        int bno = (Integer)(request.getSession().getAttribute("bno"));
+        return boardService.bupdate(btitle, bcontent,bno);
+    }
 
     // 게시물 삭제
+    @DeleteMapping("/bdelete")
+    @ResponseBody
+    public boolean bdelete(){
+        int bno = (Integer)(request.getSession().getAttribute("bno"));
+        return boardService.bdelete(bno);
+    }
 
 }
