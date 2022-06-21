@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import springweb2.dto.BoardDto;
+import springweb2.dto.ReplyDto;
 import springweb2.service.BoardService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,16 @@ public class BoardController {
         System.out.println(boardDto);
         return boardService.write(boardDto);
     }
+
+    // 댓글 작성
+    @PostMapping("/rwrite")
+    @ResponseBody
+    public boolean rwrite(ReplyDto replyDto){
+        System.out.println(replyDto);
+        return boardService.rwrite(replyDto);
+    }
+
+
     // 전체 게시물 출력
     @GetMapping("/boardlist")
     @ResponseBody
@@ -57,6 +68,17 @@ public class BoardController {
         request.getSession().setAttribute("bno",bno);
         return "view";
     }
+    // 댓글 출력
+    @GetMapping("/rview")
+    @ResponseBody
+    public void getreplylist(HttpServletResponse response,@RequestParam("bno") int bno){
+        JSONArray jsonArray = boardService.getreplylist(bno);
+        try{
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json");
+            response.getWriter().print(jsonArray);
+        }catch(Exception e){e.printStackTrace();}
+    }
 
 
     @PostMapping("/view")
@@ -70,6 +92,16 @@ public class BoardController {
             response.getWriter().print(object);
         }catch(Exception e){e.printStackTrace();}
 
+    }
+
+    @GetMapping("/getCategory")
+    public void getCategory(HttpServletResponse response){
+        JSONArray jsonArray = boardService.getcategory();
+        try{
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json");
+            response.getWriter().print(jsonArray);
+        }catch(Exception e){e.printStackTrace();}
     }
 
 
