@@ -21,7 +21,6 @@ $(function(){
 
 function bupdate(){
     let bpassword = $("#bpassword").val();
-    alert($("#btitle").val());
     if(bpassword == password){
         $.ajax({
             url : "bupdate",
@@ -81,7 +80,7 @@ function rview(){
                 let indexno = -1;
                 let indexno2 = -1;
                 if(reply[i].rdepth==0){
-                    html += '<tr><td>'+reply[i].rno+'</td><td>'+reply[i].rwriter+'</td><td>'+reply[i].rcontent+'</td><td><button onclick="rrwrite('+reply[i].rno+')">답글</button</td></tr>';
+                    html += '<tr><td>번호 : '+reply[i].rno+'</td><td>작성자 : '+reply[i].rwriter+'</td><td>내용 : '+reply[i].rcontent+'</td><td><button onclick="rrwrite('+reply[i].rno+')">답글</button><button onclick="reupdatebtn('+reply[i].rno+')">수정</button><button onclick="redeletebtn('+reply[i].rno+')">삭제</button></td></tr>';
                     html += '<tr id="re'+reply[i].rno+'" style="display:none;"><td colspan="4"><form id="rsaveform'+reply[i].rno+'">'+
                                '<div class="row">'+
                                    '<div class="col-md-6">'+
@@ -101,6 +100,8 @@ function rview(){
                                    '<input type="hidden" id="rdepth" name="rdepth" value="'+(rdepth+1)+'">'+
                                '</div>'+
                            '</form></td></tr>';
+                    html += '<tr id="reu'+reply[i].rno+'" style="display:none;"><td colspan="4"><input type="text" id="reupdatecontent'+reply[i].rno+'" value="'+reply[i].rcontent+'"><input type="text" id="reupdatepassword'+reply[i].rno+'" placeholder="비밀번호"><button onclick="reupdate('+reply[i].rno+')">수정</button> </td></tr>';
+                    html += '<tr id="red'+reply[i].rno+'" style="display:none;"><td colspan="4"><input type="text" id="redeletepassword'+reply[i].rno+'" placeholder="비밀번호"><button onclick="redelete('+reply[i].rno+')">삭제</button> </td></tr>';
                     indexno = reply[i].rno;
                     indexno2 = reply[i].rno;
                     rereply.push(reply[i].rno);
@@ -128,30 +129,9 @@ function rview(){
                             for(let a=0; a<reply[j].rdepth; a++){
                                 html += '<td></td>';
                             }
-                            html += '<td>'+reply[j].rno+'</td><td>'+reply[j].rwriter+'</td><td>'+reply[j].rcontent+'</td><td><button onclick="rrwrite('+reply[j].rno+')">답글</button</td></tr>';
-                            html += '<tr id="re'+reply[j].rno+'" style="display:none;">';
-                             for(let a=0; a<reply[j].rdepth; a++){
-                                html += '<td></td>';
-                            }
-                            html += '<td colspan="'+(4+reply[j].rdepth)+'"><form id="rsaveform'+reply[j].rno+'">'+
-                                       '<div class="row">'+
-                                           '<div class="col-md-6">'+
-                                               '<input class="form-control" type="text" name="rcontent" id="rcontent" placeholder="댓글">'+
-                                           '</div>'+
-                                           '<div class="col-md-2">'+
-                                               '<input class="form-control" type="text" name="rwriter" id="rwriter" placeholder="작성자">'+
-                                           '</div>'+
-                                           '<div class="col-md-2">'+
-                                               '<input class="form-control" type="text" name="rpassword" id="rpassword" placeholder="비밀번호">'+
-                                           '</div>'+
-                                           '<div class="col-md-2">'+
-                                               '<button class="form-control" type="button" onclick="rsave('+reply[j].rno+')">댓글작성</button>'+
-                                           '</div>'+
-                                           '<input type="hidden" id="rbno" name="bno" value="'+bbno+'">'+
-                                           '<input type="hidden" id="rindex" name="rindex" value="'+reply[j].rno+'">'+
-                                           '<input type="hidden" id="rdepth" name="rdepth" value="'+(reply[j].rdepth+1)+'">'+
-                                       '</div>'+
-                                   '</form></td></tr>';
+                            html += '<td>번호 : '+reply[j].rno+'</td><td>작성자 : '+reply[j].rwriter+'</td><td>내용 : '+reply[j].rcontent+'</td><td><button onclick="reupdatebtn('+reply[j].rno+')">수정</button><button onclick="redeletebtn('+reply[j].rno+')">삭제</button></td></tr>';
+                            html += '<tr id="reu'+reply[j].rno+'" style="display:none;"><td></td><td colspan="4"><input type="text" id="reupdatecontent'+reply[j].rno+'" value="'+reply[j].rcontent+'"><input type="text" id="reupdatepassword'+reply[j].rno+'" placeholder="비밀번호"><button onclick="reupdate('+reply[j].rno+')">수정</button> </td></tr>';
+                            html += '<tr id="red'+reply[j].rno+'" style="display:none;"><td></td><td colspan="4"><input type="text" id="redeletepassword'+reply[j].rno+'" placeholder="비밀번호"><button onclick="redelete('+reply[j].rno+')">삭제</button> </td></tr>';
                             indexno = reply[j].rno;
                             rereply.push(reply[j].rno);
                         }
@@ -203,5 +183,58 @@ function rsave(rindex){
 
 function rrwrite(rno){
     $("#re"+rno).show();
+    $("#reu"+rno).hide();
+    $("#red"+rno).hide();
 }
 
+function reupdatebtn(rno){
+    $("#re"+rno).hide();
+    $("#reu"+rno).show();
+    $("#red"+rno).hide();
+}
+
+function redeletebtn(rno){
+    $("#re"+rno).hide();
+    $("#reu"+rno).hide();
+    $("#red"+rno).show();
+}
+
+function reupdate(rno){
+    let rcontent = $("#reupdatecontent"+rno).val();
+    let rpassword = $("#reupdatepassword"+rno).val();
+    $.ajax({
+        url : "/reupdate",
+        data : {"rcontent" : rcontent, "rpassword" : rpassword, "rno":rno},
+        type : "PUT",
+        success : function(re){
+            if(re){
+                alert("수정완료");
+                let bno = $("#rbno").val();
+                location.href = "/view?bno="+bno;
+            }else{
+                 alert("비밀번호가 일치하지 않습니다.");
+            }
+        }
+
+    });
+
+}
+
+function redelete(rno){
+    let rpassword = $("#redeletepassword"+rno).val();
+    $.ajax({
+        url : "/redelete",
+        data : {"rpassword" : rpassword,"rno":rno},
+        type : "DELETE",
+        success : function(re){
+            if(re){
+                alert("삭제완료");
+                let bno = $("#rbno").val();
+                location.href = "/view?bno="+bno;
+            }else{
+                alert("비밀번호가 일치하지 않습니다.");
+            }
+        }
+
+    });
+}

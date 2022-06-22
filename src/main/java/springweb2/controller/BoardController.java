@@ -52,12 +52,12 @@ public class BoardController {
     // 전체 게시물 출력
     @GetMapping("/boardlist")
     @ResponseBody
-    public void getboardlist(HttpServletResponse response){
-        JSONArray array = boardService.boardlist();
+    public void getboardlist(HttpServletResponse response,@RequestParam("key") String key,@RequestParam("keyword") String keyword, @RequestParam("cno") int cno,@RequestParam("page") int page){
+        JSONObject object = boardService.boardlist(key,keyword,cno,page);
         try{
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json");
-            response.getWriter().print(array);
+            response.getWriter().print(object);
         }catch(Exception e){e.printStackTrace();}
     }
     // 개별 게시물 출력
@@ -113,12 +113,27 @@ public class BoardController {
         return boardService.bupdate(btitle, bcontent,bno);
     }
 
+    // 댓글 수정
+    @PutMapping("/reupdate")
+    @ResponseBody
+    public boolean reupdate(@RequestParam("rcontent") String rcontent, @RequestParam("rpassword") String rpassword, @RequestParam("rno") int rno){
+        return boardService.reupdate(rcontent,rpassword,rno);
+    }
+
+
     // 게시물 삭제
     @DeleteMapping("/bdelete")
     @ResponseBody
     public boolean bdelete(){
         int bno = (Integer)(request.getSession().getAttribute("bno"));
         return boardService.bdelete(bno);
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("/redelete")
+    @ResponseBody
+    public boolean redelete(@RequestParam("rpassword") String rpassword, @RequestParam("rno") int rno){
+        return boardService.redelete(rpassword,rno);
     }
 
 }
